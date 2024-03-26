@@ -1,8 +1,10 @@
 from controller import Supervisor
 import math
-from svgpathtools import svg2paths2
+from svgpathtools import parse_path
 from math import ceil
 import numpy as np
+import requests
+import xml.etree.ElementTree as ET
 
 class Controller(Supervisor):
     timeStep = 64
@@ -75,24 +77,45 @@ class Controller(Supervisor):
             self.draw_polygon(poly)
 
     def run(self):
-        svg_file = "../../inputs/svg_icon.svg"
-        paths, attrs, svg_attr = svg2paths2(svg_file)
+        # Try to download the SVG file from the GitHub raw URL
+        url = 'https://raw.githubusercontent.com/fumipi/svg_files/main/uploaded.svg'
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
+            svg_content = ET.fromstring(response.content)
+        except (requests.RequestException, ET.ParseError):
+            # If the request fails or the SVG content is invalid, use the local SVG file
+            svg_file = "../../inputs/svg_icon.svg"
+            with open(svg_file, 'r') as file:
+                svg_content = ET.parse(file).getroot()
+
+        # Extract paths from the SVG
+        paths = []
+        attrs = []
+        for path_element in svg_content.findall('.//{http://www.w3.org/2000/svg}path'):
+            path_data = path_element.get('d')
+            if path_data:
+                path = parse_path(path_data)
+                paths.append(path)
+                attrs.append(path_element.attrib)
+
+        svg_attr = svg_content.attrib
         
         viewbox = svg_attr.get('viewBox', '0 0 100 100')
         viewbox_values = viewbox.split()
         svg_size = float(viewbox_values[2]), float(viewbox_values[3])
         
-        # 紙のサイズを取得（将来的にはセンサーで取得する）
+        # Get the paper size (to be obtained from sensors in the future)
         root_node = self.getRoot()
         paper_node = root_node.getField('children').getMFNode(-1)
         paper_size = paper_node.getField('children').getMFNode(0).getField('geometry').getSFNode().getField('size').getSFVec2f()
         
-        # 紙のサイズにSVGを拡大縮小する
+        # Scale the SVG to fit the paper size
         scale_x = paper_size[0] / svg_size[0]
         scale_y = paper_size[1] / svg_size[1]
         scale_factor = min(scale_x, scale_y)
         
-        # SVGの座標からWebotの座標に変換
+        # Convert SVG coordinates to Webot coordinates
         offset_x = -svg_size[0] * scale_factor / 2
         offset_y = svg_size[1] * scale_factor / 2  
         
@@ -111,8 +134,8 @@ class Controller(Supervisor):
                     poly.append(points)
                 polys.append([[(p.real * scale_factor + offset_x, -p.imag * scale_factor + offset_y) for p in pl] for pl in poly])  # Flipped y-coordinate
         
-        for poly in polys[1:]:  # 枠線はスキップ
-            self.draw_multipolygon(poly) 
+        for poly in polys[1:]:  # Skip the frame line
+            self.draw_multipolygon(poly)
 
 controller = Controller()
 controller.run()
