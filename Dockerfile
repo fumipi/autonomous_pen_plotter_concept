@@ -1,5 +1,5 @@
 # Use the official Webot base image
-FROM cyberbotics/webots:R2023a
+FROM cyberbotics/webots:R2023a-ubuntu20.04-ubuntu
 
 # Install necessary system packages
 RUN apt-get update && apt-get install -y \
