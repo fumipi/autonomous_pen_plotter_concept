@@ -1,5 +1,5 @@
-# Use the official Webots.cloud base image
-FROM cyberbotics/webots.cloud:R2023a
+# Use the official Webot base image
+FROM cyberbotics/webots:R2023a
 
 # Install necessary system packages
 RUN apt-get update && apt-get install -y \
