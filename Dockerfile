@@ -1,5 +1,5 @@
 # Use the official Webot base image
-FROM cyberbotics/webots.cloud:R2023b
+FROM cyberbotics/webots.cloud:R2023b-ubuntu22.04
 
 # Install necessary system packages
 RUN apt-get update && apt-get install -y \
