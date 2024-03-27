@@ -6,8 +6,6 @@ import numpy as np
 import requests
 import xml.etree.ElementTree as ET
 
-#As webots.cloud does not support PEN device, added trail to the penbot controller in this version to mimic pen drawing
-
 class Controller(Supervisor):
     timeStep = 64
     step_size = 0.01
@@ -19,92 +17,53 @@ class Controller(Supervisor):
         self.rotation_field = self.robot.getField('rotation')
         self.pen = self.getDevice('pen')
         self.pen.write(True)
-        self.current_position = [0, 0, 0.001]
+        self.current_position = [0, 0]
         self.current_rotation = 0
         self.pen_is_down = True
-        self.trail_node = None
-        self.create_trail_shape()
-        self.last_pen_down_index = 0
 
-    def create_trail_shape(self):
-        self.trail_node = self.getFromDef("TRAIL")
-        if self.trail_node:
-            self.trail_node.remove()
+    def forward(self, distance):
+        dx = distance * math.cos(self.current_rotation)
+        dy = distance * math.sin(self.current_rotation)
+        new_position = [self.current_position[0] + dx, self.current_position[1] + dy]
+        self.move_to(new_position)
 
-        trail_string = """
-            DEF TRAIL Shape {
-                appearance Appearance {
-                    material Material {
-                        diffuseColor 0 1 0
-                        emissiveColor 0 1 0
-                    }
-                }
-                geometry IndexedLineSet {
-                    coord Coordinate {
-                        point [
-                            0 0 0.0015
-                            0 0 0.0015
-                        ]
-                    }
-                    coordIndex [
-                        0 1
-                    ]
-                }
-            }
-            """
+    def backward(self, distance):
+        self.forward(-distance)
 
-        root_node = self.getRoot()
-        root_children_field = root_node.getField("children")
-        root_children_field.importMFNodeFromString(-2, trail_string)
-        self.trail_node = self.getFromDef("TRAIL")
+    def left(self, angle):
+        self.current_rotation += math.radians(angle)
 
-    def update_trail(self):
-        if self.trail_node and self.pen_is_down:
-            target_translation = self.trans_field.getSFVec3f()
-            trail_line_set_node = self.trail_node.getField("geometry").getSFNode()
-            coordinates_node = trail_line_set_node.getField("coord").getSFNode()
-            point_field = coordinates_node.getField("point")
-            coord_index_field = trail_line_set_node.getField("coordIndex")
-
-
-            if self.pen_is_down:
-                index = point_field.getCount()
-                point_field.insertMFVec3f(index, [target_translation[0], target_translation[1], 0.001])
-
-                if index > 0:
-                    coord_index_field.insertMFInt32(-1, index - 1)
-                    coord_index_field.insertMFInt32(-1, index)
-
-                self.last_pen_down_index = index
-            else:
-                # Remove points and indices from the last pen down position
-                point_field.removeMFVec3fRange(self.last_pen_down_index, point_field.getCount() - self.last_pen_down_index)
-                coord_index_field.removeMFInt32Range(coord_index_field.getCount() - 2, 2)
+    def right(self, angle):
+        self.left(-angle)
 
     def goto(self, x, y):
-        new_position = [x, y, 0.001]
+        new_position = [x, y]
         self.move_to(new_position)
-        self.current_position = new_position
-        self.update_trail()
 
     def move_to(self, position):
-        steps = int(math.dist(self.current_position[:2], position[:2]) / self.step_size)
+        steps = int(math.dist(self.current_position, position) / self.step_size)
         for i in range(steps):
             x = self.current_position[0] + (position[0] - self.current_position[0]) * i / steps
             y = self.current_position[1] + (position[1] - self.current_position[1]) * i / steps
-            self.trans_field.setSFVec3f([x, y, position[2]])
+            self.trans_field.setSFVec3f([x, y, 0])
             self.step(self.timeStep)
-            self.update_trail()
         self.current_position = position
 
     def penup(self):
         self.pen.write(False)
         self.pen_is_down = False
-        self.update_trail()
 
     def pendown(self):
         self.pen.write(True)
         self.pen_is_down = True
+
+    def move(self, x, y):
+        self.penup()
+        self.goto(x, y)
+        self.pendown()
+
+    def line(self, x, y):
+        self.goto(x, y)
 
     def draw_polygon(self, poly):
         self.penup()
@@ -177,7 +136,6 @@ class Controller(Supervisor):
         
         for poly in polys[1:]:  # Skip the frame line
             self.draw_multipolygon(poly)
-            self.update_trail()
 
 controller = Controller()
-controller.run() 
+controller.run()

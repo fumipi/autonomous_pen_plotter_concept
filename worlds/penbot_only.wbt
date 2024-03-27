@@ -157,7 +157,7 @@ DEF MyBot Robot {
       0 0 0
     ]
   }
-  controller "penbot"
+  controller "penbot_only"
   supervisor TRUE
 }
 WoodenChair {
