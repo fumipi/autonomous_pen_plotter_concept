@@ -161,7 +161,7 @@ DEF MyBot Robot {
   supervisor TRUE
 }
 WoodenChair {
-  translation 0.852276 -1.66547 0.278137
+  translation 1.2 -1.3 0.01
   rotation -0.09315450837457903 0.7004670629719042 0.7075790636112722 -2.9576903061004254
 }
 Solid {
