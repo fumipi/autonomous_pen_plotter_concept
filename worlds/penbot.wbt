@@ -28,7 +28,7 @@ RectangleArenaThree {
   }
 }
 DEF MyBot Robot {
-  translation 0 -0.15 0
+  translation 0 -0.15 0.01
   rotation 0 0 1 -2.141595
   children [
     Pose {
