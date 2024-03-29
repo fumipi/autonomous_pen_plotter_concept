@@ -28,7 +28,7 @@ RectangleArenaThree {
   }
 }
 DEF MyBot Robot {
-  translation 0 -0.15 0
+  translation 0 -0.15 0.01
   rotation 0 0 1 -2.141595
   children [
     Pose {
@@ -37,11 +37,11 @@ DEF MyBot Robot {
       children [
         Shape {
           appearance PBRAppearance {
-            baseColor 0.0820075 0.364731 0.8
+            baseColor 0 1 0
             roughness 1
             metalness 0
           }
-          geometry DEF BODY Cylinder {
+          geometry DEF BODY {
             height 0.08
             radius 0.045
           }
@@ -72,7 +72,7 @@ DEF MyBot Robot {
             children [
               Shape {
                 appearance PBRAppearance {
-                  baseColor 1 0 0
+                  baseColor 1 1 0
                   roughness 1
                   metalness 0
                 }
