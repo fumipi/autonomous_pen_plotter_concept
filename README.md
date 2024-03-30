@@ -15,3 +15,8 @@ Currently, this robot handles SVG images created by [Vectorizer.ai](https://ja.v
 
 ### note
 I am just getting started, and planning to make the robot "autonomous" with sensors, but currently using the "supervisor" controller to move the robot as a first step. 
+
+### Video
+https://github.com/fumipi/autonomous_pen_plotter_concept/assets/21126482/eb9a22df-9059-41f6-a114-6b66dcec9c28
+
+
