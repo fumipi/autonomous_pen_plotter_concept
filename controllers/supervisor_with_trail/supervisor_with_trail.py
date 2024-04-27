@@ -120,7 +120,7 @@ class Controller(Supervisor):
                     rotation_error += 2 * math.pi
                 
                 # Rotate the robot towards the target rotation using a proportional controller
-                rotation_speed = rotation_error * 0.2  # Adjust the proportional gain as needed
+                rotation_speed = rotation_error * 0.1  # Adjust the proportional gain as needed
                 new_rotation = current_rotation + rotation_speed
                 
                 # Normalize the rotation to stay within the range of 0 to 2π radians
