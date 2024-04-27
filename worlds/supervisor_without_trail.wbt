@@ -13,8 +13,8 @@ WorldInfo {
   title "Pen"
 }
 Viewpoint {
-  orientation 0.25479870103525404 -0.3281953548729565 -0.9095963011086629 5.209254312214615
-  position -4.869525209599893 -7.7327318058209915 3.972065515944988
+  orientation 0.3270864174758042 -0.297047944955723 -0.8970936371976035 4.739702365176464
+  position -0.09806426209711432 -1.783588143093972 1.0112650447690545
 }
 TexturedBackground {
 }
@@ -37,7 +37,7 @@ DEF MyBot Robot {
       children [
         Shape {
           appearance PBRAppearance {
-            baseColor 0.0820075 0.364731 0.8
+            baseColor 0.6 0.6 0.6
             roughness 1
             metalness 0
           }
@@ -72,7 +72,7 @@ DEF MyBot Robot {
             children [
               Shape {
                 appearance PBRAppearance {
-                  baseColor 1 0 0
+                  baseColor 0 1 0
                   roughness 1
                   metalness 0
                 }

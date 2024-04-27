@@ -89,13 +89,50 @@ class Controller(Supervisor):
 
     def move_to(self, position):
         steps = int(math.dist(self.current_position[:2], position[:2]) / self.step_size)
+        
+        dx = position[0] - self.current_position[0]
+        dy = position[1] - self.current_position[1]
+        target_rotation = math.atan2(dy, dx)
+        
+        current_rotation = self.rotation_field.getSFRotation()[3]
+        rotation_diff = target_rotation - current_rotation
+        if rotation_diff > math.pi:
+            rotation_diff -= 2 * math.pi
+        elif rotation_diff < -math.pi:
+            rotation_diff += 2 * math.pi
+        
+        start_rotation_step = int(steps * 0.8)  # Start rotating at 80% of the total steps
+        
         for i in range(steps):
-            x = self.current_position[0] + (position[0] - self.current_position[0]) * i / steps
-            y = self.current_position[1] + (position[1] - self.current_position[1]) * i / steps
+            t = i / steps
+            
+            # Interpolate position using linear interpolation
+            x = self.current_position[0] + (position[0] - self.current_position[0]) * t
+            y = self.current_position[1] + (position[1] - self.current_position[1]) * t
             self.trans_field.setSFVec3f([x, y, position[2]])
+            
+            if i >= start_rotation_step:
+                current_rotation = self.rotation_field.getSFRotation()[3]
+                rotation_error = target_rotation - current_rotation
+                if rotation_error > math.pi:
+                    rotation_error -= 2 * math.pi
+                elif rotation_error < -math.pi:
+                    rotation_error += 2 * math.pi
+                
+                # Rotate the robot towards the target rotation using a proportional controller
+                rotation_speed = rotation_error * 0.2  # Adjust the proportional gain as needed
+                new_rotation = current_rotation + rotation_speed
+                
+                # Normalize the rotation to stay within the range of 0 to 2π radians
+                new_rotation = new_rotation % (2 * math.pi)
+                
+                self.rotation_field.setSFRotation([0, 0, 1, new_rotation])
+            
             self.step(self.timeStep)
             self.update_trail()
+        
         self.current_position = position
+        self.current_rotation = target_rotation
 
     def penup(self):
         self.pen.write(False)
@@ -119,16 +156,16 @@ class Controller(Supervisor):
 
     def run(self):
         # Try to download the SVG file from the GitHub raw URL
-        url = 'https://raw.githubusercontent.com/fumipi/svg_files/main/uploaded.svg'
-        try:
-            response = requests.get(url)
-            response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
-            svg_content = ET.fromstring(response.content)
-        except (requests.RequestException, ET.ParseError):
-            # If the request fails or the SVG content is invalid, use the local SVG file
-            svg_file = "../../inputs/svg_icon.svg"
-            with open(svg_file, 'r') as file:
-                svg_content = ET.parse(file).getroot()
+        # url = 'https://raw.githubusercontent.com/fumipi/svg_files/main/uploaded.svg'
+        # try:
+        #     response = requests.get(url)
+        #     response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
+        #     svg_content = ET.fromstring(response.content)
+        # except (requests.RequestException, ET.ParseError):
+        #     # If the request fails or the SVG content is invalid, use the local SVG file
+        svg_file = "../../inputs/sewing-pattern.svg"
+        with open(svg_file, 'r') as file:
+            svg_content = ET.parse(file).getroot()
 
         # Extract paths from the SVG
         paths = []
@@ -148,8 +185,17 @@ class Controller(Supervisor):
         
         # Get the paper size (to be obtained from sensors in the future)
         root_node = self.getRoot()
-        paper_node = root_node.getField('children').getMFNode(-1)
-        paper_size = paper_node.getField('children').getMFNode(0).getField('geometry').getSFNode().getField('size').getSFVec2f()
+        paper_node = None
+        for i in range(root_node.getField('children').getCount()):
+            node = root_node.getField('children').getMFNode(i)
+            if node.getTypeName() == 'Solid' and node.getField('name').getSFString() == 'paper':
+                paper_node = node
+                break
+        if paper_node:
+            paper_size = paper_node.getField('children').getMFNode(0).getField('geometry').getSFNode().getField('size').getSFVec2f()
+        else:
+            # If paper node is not found, use a default paper size
+            paper_size = [2, 2]  # Default paper size if not found in the world
         
         # Scale the SVG to fit the paper size
         scale_x = paper_size[0] / svg_size[0]
