@@ -11,6 +11,7 @@ On the desktop version, watch the robot drawing paths in black ink.
 
 ### Video of simulation run on webots desktop app
 View a video recording of the simulation running on the Webots desktop app here. This gives a closer look at the PEN feature, not yet available on webots.cloud.
+
 https://github.com/fumipi/autonomous_pen_plotter_concept/assets/21126482/b362b177-f326-418f-9efe-393e62d9b924
 
 ### SVG file uploader app
