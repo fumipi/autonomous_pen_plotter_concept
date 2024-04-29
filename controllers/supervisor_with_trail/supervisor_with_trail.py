@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 
 class Controller(Supervisor):
     timeStep = 64
-    step_size = 0.01
+    step_size = 0.005
 
     def __init__(self):
         super(Controller, self).__init__()
@@ -163,7 +163,8 @@ class Controller(Supervisor):
         #     svg_content = ET.fromstring(response.content)
         # except (requests.RequestException, ET.ParseError):
         #     # If the request fails or the SVG content is invalid, use the local SVG file
-        svg_file = "../../inputs/sewing-pattern.svg"
+        svg_file = "../../inputs/camber_p2_simplified.svg"
+        # svg_file = "../../inputs/sewing-pattern.svg"
         with open(svg_file, 'r') as file:
             svg_content = ET.parse(file).getroot()
 
@@ -206,7 +207,7 @@ class Controller(Supervisor):
         offset_x = -svg_size[0] * scale_factor / 2
         offset_y = svg_size[1] * scale_factor / 2  
         
-        seg_res = 5
+        seg_res = 15  #5 works with sewing_pattern.svg , 15 works with camber_p2_simplified.svg
         polys = []
         for path, attr in zip(paths, attrs):
             if 'stroke' in attr and attr['stroke'] != 'none':

@@ -139,7 +139,7 @@ DEF MyBot Robot {
         }
       ]
       inkDensity 1
-      leadSize 0.004
+      leadSize 0.001
       write FALSE
     }
   ]

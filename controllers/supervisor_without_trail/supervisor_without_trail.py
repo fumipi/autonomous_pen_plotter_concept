@@ -119,7 +119,7 @@ class Controller(Supervisor):
         offset_x = -svg_size[0] * scale_factor / 2
         offset_y = svg_size[1] * scale_factor / 2  
         
-        seg_res = 5
+        seg_res = 5  
         polys = []
         for path, attr in zip(paths, attrs):
             if 'stroke' in attr and attr['stroke'] != 'none':
