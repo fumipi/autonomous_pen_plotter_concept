@@ -72,7 +72,7 @@ DEF MyBot Robot {
             children [
               Shape {
                 appearance PBRAppearance {
-                  baseColor 0 1 0
+                  baseColor 0.7 1 0
                   roughness 1
                   metalness 0
                 }
@@ -140,7 +140,6 @@ DEF MyBot Robot {
       ]
       inkDensity 1
       leadSize 0.001
-      write FALSE
     }
   ]
   name "MyBot"

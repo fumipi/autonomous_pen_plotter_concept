@@ -163,7 +163,7 @@ class Controller(Supervisor):
         #     svg_content = ET.fromstring(response.content)
         # except (requests.RequestException, ET.ParseError):
         #     # If the request fails or the SVG content is invalid, use the local SVG file
-        svg_file = "../../inputs/camber_p2_simplified.svg"
+        svg_file = "../../inputs/camber_p1_simplified.svg"
         # svg_file = "../../inputs/sewing-pattern.svg"
         with open(svg_file, 'r') as file:
             svg_content = ET.parse(file).getroot()
